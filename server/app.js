@@ -78,7 +78,28 @@ app.post('/links',
 // Write your authentication routes here
 /************************************************************/
 
+app.get('/login', (req, res) => {
+  res.render('login');
+});
 
+app.get('/signup', (req, res) => {
+  res.render('signup');
+});
+
+app.post('/login', (req, res) => {
+  models.Sessions.create();
+});
+
+app.post('/signup', (req, res) => {
+  models.Users.create(req.body)
+  .then(value => {
+    return models.Sessions.create({userId: value.insertId});
+  })
+  .then(value => {
+    //store session
+    res.redirect('/'); //not working
+  });
+});
 
 /************************************************************/
 // Handle the code parameter route last - if all other routes fail
