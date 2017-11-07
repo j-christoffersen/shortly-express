@@ -1,6 +1,7 @@
 const utils = require('../lib/hashUtils');
 const Model = require('./model');
 const Users = require('./user');
+const _ = require('lodash');
 
 /**
  * Sessions is a class with methods to interact with the sessions table, which
@@ -50,10 +51,10 @@ class Sessions extends Model {
    * @returns {Promise<Object>} A promise that is fulfilled with the results of
    * an insert query or rejected with the error that occured.
    */
-  create() {
+  create(options) {
     let data = utils.createRandom32String();
     let hash = utils.createHash(data);
-    return super.create.call(this, { hash });
+    return super.create.call(this, _.extend(options, { hash }));
   }
 }
 

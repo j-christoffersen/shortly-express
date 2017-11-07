@@ -4,6 +4,7 @@ const utils = require('./lib/hashUtils');
 const partials = require('express-partials');
 const bodyParser = require('body-parser');
 const Auth = require('./middleware/auth');
+const cookieParser = require('./middleware/cookieParser.js');
 const models = require('./models');
 
 const app = express();
@@ -15,19 +16,21 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../public')));
 
+app.use(cookieParser);
+app.use(Auth.sessions);
 
 
-app.get('/', 
+app.get('/', Auth.redirectIfNotLoggedIn,
 (req, res) => {
   res.render('index');
 });
 
-app.get('/create', 
+app.get('/create', Auth.redirectIfNotLoggedIn,
 (req, res) => {
   res.render('index');
 });
 
-app.get('/links', 
+app.get('/links', Auth.redirectIfNotLoggedIn,
 (req, res, next) => {
   models.Links.getAll()
     .then(links => {
@@ -38,7 +41,7 @@ app.get('/links',
     });
 });
 
-app.post('/links', 
+app.post('/links', Auth.redirectIfNotLoggedIn,
 (req, res, next) => {
   var url = req.body.url;
   if (!models.Links.isValidUrl(url)) {
@@ -86,18 +89,52 @@ app.get('/signup', (req, res) => {
   res.render('signup');
 });
 
+app.get('/logout', (req, res) => {
+  models.Sessions.delete({id: req.session.id})
+  .then(() => {
+    res.clearCookie('shortlyid');
+    res.redirect('/login');
+  });
+});
+
 app.post('/login', (req, res) => {
-  models.Sessions.create();
+  models.Users.get({ username: req.body.username })
+  .then(user => {
+    if (user) {
+      if (models.Users.compare(req.body.password, user.password, user.salt)) {
+        req.session.userId = user.id;
+        req.session.user = user;
+        return models.Sessions.update({id: req.session.id}, {userId: user.id});
+      }
+    }
+    throw new Error('Invalid login info');
+  })
+  .then(() => {
+    res.redirect('/');
+  })
+  .catch(error => {
+    if (error.message = 'Invalid login info') {
+      res.redirect('/login');
+    } else {
+      throw error;
+    }
+  });
 });
 
 app.post('/signup', (req, res) => {
   models.Users.create(req.body)
-  .then(value => {
-    return models.Sessions.create({userId: value.insertId});
+  .then(success => {
+    return Auth.newSession(req, res, {userId: success.insertId});
   })
-  .then(value => {
-    //store session
-    res.redirect('/'); //not working
+  .then(() => {
+    res.redirect('/');
+  })
+  .catch(error => {
+    if (error.code === 'ER_DUP_ENTRY') {
+      res.redirect('/signup');
+    } else {
+      throw error;
+    }
   });
 });
 
