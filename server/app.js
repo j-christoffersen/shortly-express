@@ -81,11 +81,11 @@ app.post('/links', Auth.redirectIfNotLoggedIn,
 // Write your authentication routes here
 /************************************************************/
 
-app.get('/login', (req, res) => {
+app.get('/login', Auth.redirectIfLoggedIn, (req, res) => {
   res.render('login');
 });
 
-app.get('/signup', (req, res) => {
+app.get('/signup', Auth.redirectIfLoggedIn, (req, res) => {
   res.render('signup');
 });
 

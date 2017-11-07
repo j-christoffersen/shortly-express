@@ -597,7 +597,7 @@ describe('', function() {
     });
   });
 
-  xdescribe('Link creation:', function() {
+  describe('Link creation:', function() {
 
     var cookies = request.jar();
     var requestWithSession = request.defaults({ jar: cookies });
@@ -610,7 +610,7 @@ describe('', function() {
       }
     };
 
-    xbeforeEach(function(done) {
+    beforeEach(function(done) {
       var options = {
         'method': 'POST',
         'followAllRedirects': true,
@@ -763,3 +763,13 @@ describe('', function() {
     });
   });
 });
+
+
+/*
+ 36  -_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_,------,
+ 0   -_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_|   /\_/\ 
+ 0   -_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-^|__( ^ .^) 
+     -_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-  ""  "" 
+
+  36 passing (19s)
+*/

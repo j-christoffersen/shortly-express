@@ -34,6 +34,14 @@ module.exports.redirectIfNotLoggedIn = function(req, res, next) {
   }
 };
 
+module.exports.redirectIfLoggedIn = function(req, res, next) {
+  if (req.session && req.session.userId) {
+    res.redirect('/logout');
+  } else {
+    next();
+  }
+};
+
 // Helper functions
 /**
  * @returns {Promise<Object>} A promise that is fulfilled with a session object
